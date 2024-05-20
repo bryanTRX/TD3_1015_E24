@@ -1,7 +1,7 @@
 ﻿/**
-* Programme contenant les exercices du TD2.
+* Programme contenant le projet du TD2.
 * \file		td2.cpp
-* \author	Iliass Khider et Bryan Alexandre Tavares 
+* \author	Iliass Khider et Bryan Alexandre Tavares
 * \date		14 mai 2024
 * Créé le	19 mai 2024
 */
@@ -39,9 +39,9 @@ size_t lireUintTailleVariable(istream& fichier)
 {
 	uint8_t entete = lireType<uint8_t>(fichier);
 	switch (entete) {
-	case enteteTailleVariableDeBase+0: return lireType<uint8_t>(fichier);
-	case enteteTailleVariableDeBase+1: return lireType<uint16_t>(fichier);
-	case enteteTailleVariableDeBase+2: return lireType<uint32_t>(fichier);
+	case enteteTailleVariableDeBase + 0: return lireType<uint8_t>(fichier);
+	case enteteTailleVariableDeBase + 1: return lireType<uint16_t>(fichier);
+	case enteteTailleVariableDeBase + 2: return lireType<uint32_t>(fichier);
 	default:
 		erreurFataleAssert("Tentative de lire un entier de taille variable alors que le fichier contient autre chose à cet emplacement.");
 	}
@@ -64,11 +64,14 @@ gsl::span<Concepteur*> spanListeConcepteurs(const ListeConcepteurs& liste)
 }
 #pragma endregion
 
+// Cette fonction prend en paramètre un nom de type const string& et une liste de jeux de type const ListeJeux&.
+// Elle retourne un pointeur vers le concepteur ayant le nom spécifié.
+
 Concepteur* trouverConcepteurParNom(const string& nom, const ListeJeux& listeJeux)
 {
-	for (const Jeu* jeu : spanListeJeux(listeJeux)) 
+	for (const Jeu* jeu : spanListeJeux(listeJeux))
 	{
-		for (Concepteur* concepteur : spanListeConcepteurs(jeu->concepteurs)) 
+		for (Concepteur* concepteur : spanListeConcepteurs(jeu->concepteurs))
 		{
 			if (concepteur->nom == nom) {
 				return concepteur;
@@ -78,16 +81,20 @@ Concepteur* trouverConcepteurParNom(const string& nom, const ListeJeux& listeJeu
 	return nullptr;
 }
 
+// Cette fonction prend en paramètre un fichier de type istream& et une liste de jeux de type ListeJeux&.
+// Elle retourne un pointeur vers un concepteur existant si le concepteur avec le nom spécifié existe déjà,
+// ou un pointeur vers un nouveau concepteur dans le cas contraire.
+
 Concepteur* lireConcepteur(istream& fichier, const ListeJeux& listeJeux)
 {
-	Concepteur concepteur     = {}; 
-	concepteur.nom            = lireString(fichier);
+	Concepteur concepteur = {};
+	concepteur.nom = lireString(fichier);
 	concepteur.anneeNaissance = int(lireUintTailleVariable(fichier));
-	concepteur.pays           = lireString(fichier);
+	concepteur.pays = lireString(fichier);
 
 	Concepteur* concepteurExistant = trouverConcepteurParNom(concepteur.nom, listeJeux);
-	Concepteur* nouveauConcepteur  = new Concepteur(concepteur);
-	
+	Concepteur* nouveauConcepteur = new Concepteur(concepteur);
+
 	if (concepteurExistant == nullptr)
 	{
 		cout << "Nouveau Concepteur  : " << concepteur.nom << endl;
@@ -102,16 +109,22 @@ Concepteur* lireConcepteur(istream& fichier, const ListeJeux& listeJeux)
 	}
 }
 
+// Cette fonction prend en paramètre une nouvelle capacité de type size_t et une liste de jeux de type ListeJeux&.
+// Elle permet de changer la taille de la liste ListeJeux. 
+
 void changerTailleListeJeux(size_t nouvelleCapacite, ListeJeux& listeJeux)
 {
-    Jeu** nouveauTableau = new Jeu * [nouvelleCapacite];
+	Jeu** nouveauTableau = new Jeu * [nouvelleCapacite];
 	copy(listeJeux.elements, listeJeux.elements + listeJeux.nElements, nouveauTableau);
 
-    delete[] listeJeux.elements;
+	delete[] listeJeux.elements;
 
-    listeJeux.elements = nouveauTableau;
-    listeJeux.capacite = nouvelleCapacite;
+	listeJeux.elements = nouveauTableau;
+	listeJeux.capacite = nouvelleCapacite;
 }
+
+// Cette fonction prend en paramètre un jeu de type Jeu* et une liste de jeux de type ListeJeux&.
+// Elle permet d'ajouter un jeu à une liste de jeux.
 
 void ajouterJeuListeJeux(Jeu* jeu, ListeJeux& listeJeux)
 {
@@ -123,6 +136,9 @@ void ajouterJeuListeJeux(Jeu* jeu, ListeJeux& listeJeux)
 
 	listeJeux.elements[listeJeux.nElements++] = jeu;
 }
+
+// Cette fonction prend en parametres un jeu de type Jeu* et une liste de jeux de type ListeJeux& et permet
+// d'enlever un jeu à une liste de jeux sans le détruire.
 
 void enleverJeuListeJeux(Jeu* jeu, ListeJeux& listeJeux)
 {
@@ -141,9 +157,13 @@ void enleverJeuListeJeux(Jeu* jeu, ListeJeux& listeJeux)
 	}
 }
 
+// Cette fonction prend en paramètre un fichier de type istream& et une liste de jeux de type ListeJeux&.
+// Elle lit les données d'un jeu depuis le fichier, crée une nouvelle instance de Jeu,
+// l'initialise avec les données lues, et retourne un pointeur vers ce jeu.
+
 Jeu* lireJeu(istream& fichier, const ListeJeux& listeJeux)
 {
-	Jeu jeu = {}; 
+	Jeu jeu = {};
 	jeu.titre = lireString(fichier);
 	jeu.anneeSortie = int(lireUintTailleVariable(fichier));
 	jeu.developpeur = lireString(fichier);
@@ -153,16 +173,19 @@ Jeu* lireJeu(istream& fichier, const ListeJeux& listeJeux)
 
 	cout << "\n\033[32m═════════════════\033[0m " << nouveauJeu->titre << " \033[32m═════════════════\033[0m\n";
 	cout << "Nouvel jeu créé     : " << nouveauJeu->titre << endl;
-	
+
 	for ([[maybe_unused]] size_t i : iter::range(jeu.concepteurs.nElements))
 	{
-		Concepteur* concepteur = lireConcepteur(fichier, listeJeux); 
+		Concepteur* concepteur = lireConcepteur(fichier, listeJeux);
 		jeu.concepteurs.elements[i] = concepteur;
 		ajouterJeuListeJeux(nouveauJeu, concepteur->jeuxConcus);
 	}
 
 	return nouveauJeu;
 }
+
+// Cette fonction prend en parametre le nom du fichier de type string& et ajoute à l'aide d'une boucle les jeux dans la listeJeux à l'aide 
+// de la fonction ajouterJeuListeJeux et changerTailleListeJeux. Par la suite, elle retourne la liste de jeux. 
 
 ListeJeux creerListeJeux(const string& nomFichier)
 {
@@ -171,7 +194,7 @@ ListeJeux creerListeJeux(const string& nomFichier)
 	size_t nElements = lireUintTailleVariable(fichier);
 	ListeJeux listeJeux = {};
 
-	for([[maybe_unused]] size_t n : iter::range(nElements))
+	for ([[maybe_unused]] size_t n : iter::range(nElements))
 	{
 		ajouterJeuListeJeux(lireJeu(fichier, listeJeux), listeJeux);
 		changerTailleListeJeux(listeJeux.nElements, listeJeux);
@@ -179,6 +202,9 @@ ListeJeux creerListeJeux(const string& nomFichier)
 
 	return listeJeux;
 }
+
+// Cette fonction prend en parametre un concepteur de type Concepteur* et permet de detruire un concepteur dans le cas ou il existe. 
+// Dans le cas contraire, elle affiche un message d'erreur car on essaye de detruire un concpeteur nul. 
 
 void detruireConcepteur(Concepteur* concepteur)
 {
@@ -195,9 +221,15 @@ void detruireConcepteur(Concepteur* concepteur)
 	}
 }
 
-bool concepteurParticipeJeu(Concepteur* concepteur, Jeu* jeu) 
+// La fonction concepteurParticipeJeu prend en paramètre un pointeur vers un Concepteur 
+// et un pointeur vers un Jeu. Elle vérifie si le concepteur a participé à la conception 
+// du jeu spécifié. Pour ce faire, elle parcourt la liste des jeux conçus par le concepteur 
+// et retourne true si le jeu est trouvé dans cette liste. Si le jeu n'est pas trouvé, 
+// elle retourne false.
+
+bool concepteurParticipeJeu(Concepteur* concepteur, Jeu* jeu)
 {
-	for (size_t i = 0; i < concepteur->jeuxConcus.nElements; ++i) 
+	for (size_t i = 0; i < concepteur->jeuxConcus.nElements; ++i)
 	{
 		if (concepteur->jeuxConcus.elements[i] == jeu)
 		{
@@ -207,9 +239,23 @@ bool concepteurParticipeJeu(Concepteur* concepteur, Jeu* jeu)
 	return false;
 }
 
+// Cette fonction prend en paramètre un pointeur vers un objet de type Jeu. 
+// Elle commence par vérifier si le pointeur n'est pas nul. Si le jeu existe, 
+// elle affiche un message indiquant la suppression du jeu. Ensuite, elle 
+// parcourt la liste des concepteurs associés au jeu et, pour chaque concepteur, 
+// elle enlève le jeu de la liste des jeux conçus par ce concepteur en utilisant 
+// la fonction enleverJeuListeJeux.
+//
+// Ensuite, la fonction parcourt à nouveau la liste des concepteurs et détruit 
+// chaque concepteur en utilisant la fonction detruireConcepteur, à condition 
+// que ce concepteur n'ait plus aucun jeu associé.
+//
+// Finalement, la fonction libère la mémoire allouée pour la liste des concepteurs 
+// et pour le jeu lui-même, garantissant ainsi qu'il ne reste aucune fuite de mémoire.
+
 void detruireJeu(Jeu* jeu)
 {
-	if (jeu != nullptr) 
+	if (jeu != nullptr)
 	{
 		cout << "\n\033[31m═════════════════\033[0m " << jeu->titre << " \033[31m═════════════════\033[0m\n";
 		cout << "Jeu supprime       : " << jeu->titre << endl;
@@ -233,12 +279,17 @@ void detruireJeu(Jeu* jeu)
 		}
 
 		delete[] jeu->concepteurs.elements;
-		jeu->concepteurs.elements  = nullptr;
+		jeu->concepteurs.elements = nullptr;
 		jeu->concepteurs.nElements = 0;
 
 		delete jeu;
 	}
 }
+
+// La fonction detruireListeJeux prend en paramètre une liste principale de jeux 
+// et parcourt cette liste pour détruire chacun de ses éléments à l'aide de la 
+// fonction detruireJeu. Après avoir détruit tous les jeux, elle libère la mémoire 
+// allouée pour la liste et réinitialise ses attributs pour éviter les fuites de mémoire.
 
 void detruireListeJeux(ListeJeux& listeJeux)
 {
@@ -252,10 +303,19 @@ void detruireListeJeux(ListeJeux& listeJeux)
 	listeJeux.nElements = 0;
 }
 
+// La fonction afficherConcepteur prend en paramètre un objet de type Concepteur 
+// et affiche les informations relatives à ce concepteur (son nom, annee de naissance ainsi que son pays).
+
 void afficherConcepteur(const Concepteur& concepteur)
 {
 	cout << "\t" << concepteur.nom << ", " << concepteur.anneeNaissance << ", " << concepteur.pays << endl;
 }
+
+// La fonction afficherInfosJeu prend en paramètre un objet de type Jeu et affiche 
+// les différentes informations relatives à ce jeu, telles que son titre, son 
+// développeur et son année de sortie. De plus, elle parcourt la liste des 
+// concepteurs du jeu et utilise la fonction afficherConcepteur pour afficher 
+// les détails de chaque concepteur.
 
 void afficherInfosJeu(const Jeu& jeu)
 {
@@ -270,11 +330,15 @@ void afficherInfosJeu(const Jeu& jeu)
 	}
 }
 
+// La fonction afficherTousJeux prend en paramètre une liste principale de jeux, 
+// la parcourt et utilise la fonction afficherInfosJeu pour afficher les détails 
+// de chaque jeu contenu dans la liste. Chaque jeu est traité individuellement.
+
 void afficherTousJeux(const ListeJeux& listeJeux)
 {
 	static const string ligneDeSeparation = "\n\033[34m════════════════════════════════════════════════════════\033[0m\n";
 	cout << ligneDeSeparation;
-	
+
 	for (auto&& jeu : spanListeJeux(listeJeux))
 	{
 		afficherInfosJeu(*jeu);
@@ -289,12 +353,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 	// https://en.wikipedia.org/wiki/ANSI_escape_code ; les consoles Linux/Mac
 	// les supportent normalement par défaut.
 	bibliotheque_cours::activerCouleursAnsi();
-#pragma endregion
+#pragma 
+
+	// ------------------------------------------------------ Partie 1 ------------------------------------------------------
 
 	int* fuite = new int;
 
 	static const string lignePartie1Separation = "\n\033[35m════════════════════════ PARTIE 1 ═════════════════════════\033[0m";
-	static const string lignePartie2Separation = "\n\033[35m════════════════════════ PARTIE 2 ═════════════════════════\033[0m";
 
 	cout << lignePartie1Separation << endl;
 	cout << endl << "Création de la liste de jeux:";
@@ -307,6 +372,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 
 	cout << endl << "Les jeux sont:";
 	afficherTousJeux(listeJeux);
+
+	// ------------------------------------------------------ Partie 2 ------------------------------------------------------
+
+	static const string lignePartie2Separation = "\n\033[35m════════════════════════ PARTIE 2 ═════════════════════════\033[0m";
 
 	cout << lignePartie2Separation << endl;
 	ListeDeveloppeurs listeDeveloppeurs;
@@ -333,17 +402,19 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 	listeDeveloppeurs.retirerDeveloppeur(dev1);
 	cout << "Liste des développeurs après suppression de FromSoftware : " << endl;
 	listeDeveloppeurs.afficher();
-	
+
 	cout << ligneDeSeparation;
 	cout << "Vérification de l'existence des développeurs dans la liste : \n";
 	cout << "FromSoftware est " << (listeDeveloppeurs.trouverDeveloppeur("FromSoftware") ? "présent" : "absent") << " dans la liste." << endl;
 	cout << "MicroProse est " << (listeDeveloppeurs.trouverDeveloppeur("MicroProse") ? "présent" : "absent") << " dans la liste." << endl;
-	
+
+	delete dev1;
+
+	// ------------------------------------------------------ Partie 1 ------------------------------------------------------
+
 	cout << lignePartie1Separation << endl;
 	cout << endl << "Destruction de la liste de jeux:";
 	detruireListeJeux(listeJeux);
-
-	delete dev1; 
 
 	delete fuite;
 }
