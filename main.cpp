@@ -3,7 +3,7 @@
 * \file		td2.cpp
 * \author	Iliass Khider et Bryan Alexandre Tavares
 * \date		14 mai 2024
-* Créé le	19 mai 2024
+* Créé le	21 mai 2024
 */
 
 #include "Jeu.hpp"
@@ -19,7 +19,7 @@
 #include "gsl/span"
 #include "bibliotheque_cours.hpp"
 #include "verification_allocation.hpp"
-#include "debogage_memoire.hpp"  //NOTE: Incompatible avec le "placement new", ne pas utiliser cette entête si vous utilisez ce type de "new" dans les lignes qui suivent cette inclusion.
+#include "debogage_memoire.hpp"  // NOTE: Incompatible avec le "placement new", ne pas utiliser cette entête si vous utilisez ce type de "new" dans les lignes qui suivent cette inclusion.
 
 using namespace std;
 using namespace iter;
@@ -377,7 +377,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 
 	static const string lignePartie2Separation = "\n\033[35m════════════════════════ PARTIE 2 ═════════════════════════\033[0m";
 
-	cout << lignePartie2Separation << endl;
+	cout << endl << lignePartie2Separation << endl;
 	ListeDeveloppeurs listeDeveloppeurs;
 
 	Developpeur* dev1 = new Developpeur("FromSoftware");
@@ -389,9 +389,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 	dev1->mettreAJourListeJeux(listeJeux);
 	dev2->mettreAJourListeJeux(listeJeux);
 
-	cout << "\nJeux du développeur FromSoftware : ";
+	cout << "\nJeux du développeur " << dev1->getNom() << " : ";
 	dev1->afficherJeux();
-	cout << "Jeux du développeur MicroProse : ";
+	cout << "Jeux du développeur " << dev2->getNom() << " : ";
 	dev2->afficherJeux();
 
 	cout << ligneDeSeparation;
@@ -400,19 +400,19 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 	cout << ligneDeSeparation;
 
 	listeDeveloppeurs.retirerDeveloppeur(dev1);
-	cout << "Liste des développeurs après suppression de FromSoftware : " << endl;
+	cout << "Liste de jeu après suppression de " << dev1->getNom() << " : " << endl;
 	listeDeveloppeurs.afficher();
 
 	cout << ligneDeSeparation;
-	cout << "Vérification de l'existence des développeurs dans la liste : \n";
-	cout << "FromSoftware est " << (listeDeveloppeurs.trouverDeveloppeur("FromSoftware") ? "présent" : "absent") << " dans la liste." << endl;
-	cout << "MicroProse est " << (listeDeveloppeurs.trouverDeveloppeur("MicroProse") ? "présent" : "absent") << " dans la liste." << endl;
+	cout << "Vérification de l'existence des développeurs dans la liste : " << endl;
+	cout << dev1->getNom() << " est " << (listeDeveloppeurs.trouverDeveloppeur("FromSoftware") ? "présent" : "absent") << " dans la liste." << endl;
+	cout << dev2->getNom() << " est " << (listeDeveloppeurs.trouverDeveloppeur("MicroProse") ? "présent" : "absent") << " dans la liste." << endl;
 
 	delete dev1;
 
 	// ------------------------------------------------------ Partie 1 ------------------------------------------------------
 
-	cout << lignePartie1Separation << endl;
+	cout << endl << lignePartie1Separation << endl;
 	cout << endl << "Destruction de la liste de jeux:";
 	detruireListeJeux(listeJeux);
 
