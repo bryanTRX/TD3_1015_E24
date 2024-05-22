@@ -1,75 +1,26 @@
 ﻿#pragma once
 #include <cstddef>
-#include <string>
 #include "Developpeur.hpp"
-#include <memory> // Ajout pour les pointeurs intelligents
-
-using namespace std;
-using namespace gsl;
+#include "gsl/span"  // On utilise encode gsl::span au lieu de std::span car c'est la version de span disponible à l'examen.
 
 class ListeDeveloppeurs
 {
+	//TODO: En faire une classe qui suit les principes OO.
+	//TODO: On veut pouvoir ajouter et enlever un Developpeur* de la liste, avec réallocation dynamique tel que faite pour ListeJeux.
+	//NOTE: Le code sera principalement copié de certaines fonctions écrites pour la partie 1, mais mises dans une classe.
 public:
-    ListeDeveloppeurs() : nElements(0), capacite(1), elements(new std::shared_ptr<Developpeur>[1]) {}
-    ~ListeDeveloppeurs() = default; // Pas besoin de définir le destructeur explicitement
+	ListeDeveloppeurs() = default;
+	~ListeDeveloppeurs();
 
-    void afficher() const
-    {
-        for (size_t i = 0; i < nElements; ++i)
-        {
-            elements[i]->afficherJeux();
-        }
-    }
+	void ajouter(Developpeur* d);
+	void retirer(const Developpeur* aRetirer);
 
-    void ajouterDeveloppeur(const std::shared_ptr<Developpeur>& developpeur)
-    {
-        if (trouverDeveloppeur(developpeur->getNom()) == nullptr)
-        {
-            if (nElements >= capacite)
-            {
-                augmenterCapacite();
-            }
-            elements[nElements++] = developpeur;
-        }
-    }
-
-    void retirerDeveloppeur(const std::shared_ptr<Developpeur>& developpeur)
-    {
-        for (size_t i = 0; i < nElements; ++i)
-        {
-            if (elements[i] == developpeur)
-            {
-                elements[i] = elements[--nElements];
-                return;
-            }
-        }
-    }
-
-    std::shared_ptr<Developpeur> trouverDeveloppeur(const std::string& nom) const
-    {
-        for (size_t i = 0; i < nElements; ++i)
-        {
-            if (elements[i]->getNom() == nom)
-            {
-                return elements[i];
-            }
-        }
-        return nullptr;
-    }
-
-    void augmenterCapacite()
-    {
-        capacite *= 2;
-        auto nouvelleListe = std::make_unique<std::shared_ptr<Developpeur>[]>(capacite); // Utilisation de make_unique
-
-        for (size_t i = 0; i < nElements; ++i)
-        {
-            nouvelleListe[i] = elements[i];
-        }
-        elements = std::move(nouvelleListe); // Utilisation de move pour transférer la propriété du pointeur
-    }
+	void afficher() const;
 
 private:
-    size_t nElements, capacite;
-    std::unique_ptr<std::shared_ptr<Developpeur>[]> elements; // Utilisation de unique_ptr pour la gestion automatique de la mémoire
+	void changerCapacite(std::size_t nouvelleCapacite);  // Pas dit si ça doit être public ou non.
+	gsl::span<Developpeur*> enSpan() const { return { elements_, nElements_ }; }  // Pourrait être public.
+
+	std::size_t nElements_ = 0, capacite_ = 0;  // Pas besoin de déclarer explicitement un corps de constructeur avec ces initialisations.
+	Developpeur** elements_ = nullptr;
 };

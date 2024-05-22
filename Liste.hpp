@@ -1,15 +1,17 @@
-#pragma once
+#pragma once 
 
 #ifndef LISTE_HPP
 #define LISTE_HPP
 
 #include <memory>
-#include <string>
 #include <cstddef>
-#include <vector>
 #include <iostream>
 #include <algorithm>
 #include <stdexcept>
+#include "cppitertools/range.hpp"
+#include "Concepteur.hpp"
+#include "Developpeur.hpp"
+#include "Jeu.hpp"
 #include "gsl/span"
 
 using namespace std;
@@ -19,119 +21,87 @@ class Liste
 {
 public:
 	// Constructeurs ----------------------------------------------------------------------------
-	
-	Liste() : capacite(0), nElements(0), elements(nullptr) {}
-	Liste(size_t capaciteInitiale, size_t ElementsInitial) : capacite(capaciteInitiale), nElements(ElementsInitial), elements(new shared_ptr<T>[capaciteInitiale]) {}
-	Liste(const Liste& other) : capacite(other.capacite), nElements(other.nElements), elements(new shared_ptr<T>[other.capacite])
+
+	Liste() : capacite_(0), nElements_(0), elements_(nullptr) {}
+	Liste(size_t nElementsInitiales, size_t capaciteInitiale) : nElements_(nElementsInitiales), capacite_(capaciteInitiale), elements_(new shared_ptr<T>[capaciteInitiale]) {}
+	Liste(const Liste& other) : capacite_(other.capacite_), nElements_(other.nElements_), elements_(new shared_ptr<T>[other.capacite_])
 	{
-		if (capacite != 0 && nElements != 0)
+		if (capacite_ != 0 && nElements_ != 0)
 		{
-			for (size_t elem = 0; elem < nElements; ++elem)
+			for (size_t elem = 0; elem < nElements_; ++elem)
 			{
-				elements[elem] = other.elements[elem];
+				elements_[elem] = other.elements_[elem];
 			}
 		}
 	}
-
 	~Liste() = default;
 
 	// Methodes ---------------------------------------------------------------------------------
 
-	/*gsl::span<std::shared_ptr<T>> getSpan() const
+	void afficher() const
 	{
-		return gsl::span<std::shared_ptr<T>>(elements.get(), taille());
-	}*/
-
-	template<typename U>
-    friend gsl::span<std::shared_ptr<U>> spanListe(const Liste<U>& liste);
-
-	/*void ajouter(const shared_ptr<T>& element)
-	{
-		if (std::find(elements.get(), elements.get() + nElements, element) == elements.get() + nElements)
+		for (auto& element : enSpan())
 		{
-			if (nElements >= capacite)
-			{
-				augmenterCapacite();
-			}
-			elements[nElements++] = element;
+			element->afficher();
 		}
-	}*/
+	}
 
 	void ajouter(const shared_ptr<T>& element)
 	{
-		if (trouver(element->getNom()))
+		if (nElements_ >= capacite_)
 		{
-			return;
+			changerCapacite(max(size_t(1), capacite_ * 2));
 		}
-
-		if (nElements >= capacite)
-		{
-			augmenterCapacite();
-		}
-		elements[nElements++] = element;
+		elements_[nElements_++] = element;
 	}
 
-	void retirer(const shared_ptr<T>& element)
+	void retirer(const shared_ptr<T>& aRetirer)
 	{
-		auto it = std::find(elements.get(), elements.get() + nElements, element);
-		if (it != elements.get() + nElements)
+		for (auto& d : enSpan())
 		{
-			*it = elements[--nElements];
+			if (d == aRetirer)
+			{
+				if (nElements_ > 1)
+				{
+					d = elements_[nElements_ - 1];
+				}
+				nElements_--;
+			}
 		}
 	}
 
-	shared_ptr<T> trouver(const string& nom) const
+	void changerCapacite(size_t nouvelleCapacite)
 	{
-		auto it = find_if(elements.get(), elements.get() + nElements, [&nom](const shared_ptr<T>& element) { return element->getNom() == nom; });
-		return it != elements.get() + nElements ? *it : nullptr;
-	}
+		assert(nouvelleCapacite >= nElements_);
+		unique_ptr<shared_ptr<T>[]> nouvelleListe(new shared_ptr<T>[nouvelleCapacite]);
 
-	void augmenterCapacite()
-	{
-		capacite = capacite ? capacite * 2 : 1;
-		unique_ptr<shared_ptr<T>[]> nouvelleListe(new shared_ptr<T>[capacite]);
-		for (size_t i = 0; i < nElements; ++i)
+		for (size_t i : iter::range(nElements_))
 		{
-			nouvelleListe[i] = elements[i];
+			nouvelleListe[i] = elements_[i];
 		}
-		elements.swap(nouvelleListe);
+		elements_ = move(nouvelleListe);
+		capacite_ = nouvelleCapacite;
 	}
 
 	size_t taille() const
 	{
-		return nElements;
+		return nElements_;
 	}
 
 	shared_ptr<T> operator[](size_t index) const
 	{
-		if (index >= nElements)
+		if (index >= nElements_)
 		{
 			throw out_of_range("Index hors limite");
 		}
-		return elements[index];
-	}
-
-	Liste& operator=(const Liste& other)
-	{
-		if (this == &other) { return *this; }
-
-		capacite = other.capacite;
-		nElements = other.nElements;
-
-		elements.reset(new shared_ptr<T>[capacite]);
-
-		if (nElements > 0)
-		{
-			copy(other.elements.get(), other.elements.get() + nElements, elements.get());
-		}
-		return *this;
+		return elements_[index];
 	}
 
 	template<typename Function>
 	shared_ptr<T> chercherElement(Function critere) const
 	{
-		auto it = find_if(elements.get(), elements.get() + nElements, critere);
-		return it != elements.get() + nElements ? *it : nullptr;
+		auto it = find_if(elements_.get(), elements_.get() + nElements_, critere);
+		return it != elements_.get() + nElements_ ? *it : nullptr;
 	}
 
 	template<typename Function>
@@ -148,19 +118,51 @@ public:
 	template<typename U>
 	friend ostream& operator<<(ostream& os, const Liste<U>& liste);
 
+	gsl::span<shared_ptr<T>> enSpan() const { return gsl::span<shared_ptr<T>>(elements_.get(), nElements_); }
+
+	/*template <typename U>
+	friend gsl::span<shared_ptr<U>> spanListeJeux(const Liste<U>& liste);
+
+	template <typename W>
+	friend gsl::span<shared_ptr<W>> spanListeConcepteurs(const Liste<W>& liste);*/
+
 private:
-	size_t capacite, nElements;
-	unique_ptr<shared_ptr<T>[]> elements;
+	size_t nElements_ = 0, capacite_ = 0;
+	unique_ptr<shared_ptr<T>[]> elements_;
 };
+
+//template <typename T>
+//gsl::span<shared_ptr<T>> spanListeJeux(const Liste<Jeu>& liste) 
+//{
+//	return { liste.elements_.get(), liste.nElements_ };
+//}
+//
+//template <typename T> 
+//gsl::span<shared_ptr<Concepteur>> spanListeConcepteurs(const Liste<Jeu>& liste)
+//{
+//	return { liste.elements_.get(), liste.nElements_ };
+//}
 
 template<typename T>
 ostream& operator<<(ostream& os, const Liste<T>& liste)
 {
 	for (size_t i = 0; i < liste.taille(); ++i)
 	{
-		os << *(liste.elements[i]) << endl;
+		os << *(liste.elements_[i]) << endl;
 	}
 	return os;
 }
 
-#endif 
+template <typename T>
+gsl::span<shared_ptr<T>> spanListeJeux(const Liste<T>& liste)
+{
+	return liste.enSpan();
+}
+
+template <typename T>
+gsl::span<shared_ptr<T>> spanListeConcepteurs(const Liste<T>& liste)
+{
+	return liste.enSpan();
+}
+
+#endif

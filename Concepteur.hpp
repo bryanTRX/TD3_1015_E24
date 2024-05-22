@@ -1,19 +1,14 @@
-﻿#ifndef CONCEPTEUR_HPP
-#define CONCEPTEUR_HPP
-
+﻿#pragma once
 #include <string>
-#include <vector>
-#include <memory>
+#include "Jeu.hpp"
+#include "Liste.hpp"
 
-// Déclaration avancée de la structure Jeu
 struct Jeu;
 
 struct Concepteur
 {
-    std::string nom;
-    int anneeNaissance;
-    std::string pays;
-    std::vector<std::shared_ptr<Jeu>> jeuxConcus;
+	std::string nom;
+	int anneeNaissance;
+	std::string pays;
+	Liste<Jeu> jeuxConcus;
 };
-
-#endif // CONCEPTEUR_HPP

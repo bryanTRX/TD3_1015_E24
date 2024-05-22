@@ -1,17 +1,14 @@
-﻿#ifndef JEU_HPP
-#define JEU_HPP
-
+﻿#pragma once
 #include <string>
-#include <vector>
-#include <memory>
 #include "Concepteur.hpp"
+#include "Liste.hpp"
+
+struct Concepteur;
 
 struct Jeu
 {
-    std::string titre;
-    int anneeSortie;
-    std::string developpeur;
-    std::vector<std::shared_ptr<Concepteur>> concepteurs;
+	std::string titre;
+	int anneeSortie;
+	std::string developpeur;
+	Liste<Concepteur> concepteurs;
 };
-
-#endif // JEU_HPP
