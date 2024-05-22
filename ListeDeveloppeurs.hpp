@@ -2,20 +2,16 @@
 #include <cstddef>
 #include <string>
 #include "Developpeur.hpp"
+#include <memory> // Ajout pour les pointeurs intelligents
+
+using namespace std;
+using namespace gsl;
 
 class ListeDeveloppeurs
 {
 public:
-
-    ListeDeveloppeurs() : nElements(0), capacite(1), elements(new Developpeur* [1]) {}
-    ~ListeDeveloppeurs()
-    {
-        for (size_t i = 0; i < nElements; ++i)
-        {
-            delete elements[i];
-        }
-        delete[] elements;
-    }
+    ListeDeveloppeurs() : nElements(0), capacite(1), elements(new std::shared_ptr<Developpeur>[1]) {}
+    ~ListeDeveloppeurs() = default; // Pas besoin de définir le destructeur explicitement
 
     void afficher() const
     {
@@ -25,7 +21,7 @@ public:
         }
     }
 
-    void ajouterDeveloppeur(Developpeur* developpeur)
+    void ajouterDeveloppeur(const std::shared_ptr<Developpeur>& developpeur)
     {
         if (trouverDeveloppeur(developpeur->getNom()) == nullptr)
         {
@@ -37,7 +33,7 @@ public:
         }
     }
 
-    void retirerDeveloppeur(Developpeur* developpeur)
+    void retirerDeveloppeur(const std::shared_ptr<Developpeur>& developpeur)
     {
         for (size_t i = 0; i < nElements; ++i)
         {
@@ -49,7 +45,7 @@ public:
         }
     }
 
-    Developpeur* trouverDeveloppeur(const std::string& nom) const
+    std::shared_ptr<Developpeur> trouverDeveloppeur(const std::string& nom) const
     {
         for (size_t i = 0; i < nElements; ++i)
         {
@@ -64,17 +60,16 @@ public:
     void augmenterCapacite()
     {
         capacite *= 2;
-        Developpeur** nouvelleListe = new Developpeur * [capacite];
+        auto nouvelleListe = std::make_unique<std::shared_ptr<Developpeur>[]>(capacite); // Utilisation de make_unique
 
         for (size_t i = 0; i < nElements; ++i)
         {
             nouvelleListe[i] = elements[i];
         }
-        delete[] elements;
-        elements = nouvelleListe;
+        elements = std::move(nouvelleListe); // Utilisation de move pour transférer la propriété du pointeur
     }
 
 private:
     size_t nElements, capacite;
-    Developpeur** elements;
+    std::unique_ptr<std::shared_ptr<Developpeur>[]> elements; // Utilisation de unique_ptr pour la gestion automatique de la mémoire
 };

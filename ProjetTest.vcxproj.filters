@@ -57,5 +57,8 @@
     <ClInclude Include="ListeJeux.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Liste.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

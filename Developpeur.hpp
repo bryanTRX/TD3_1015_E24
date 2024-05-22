@@ -1,60 +1,83 @@
 ﻿#pragma once
 #include <string>
 #include <iostream>
-#include "ListeJeux.hpp"
+#include "Liste.hpp"
 #include "Jeu.hpp"
 
 class Developpeur
 {
 public:
-    Developpeur(const std::string& nomDev) : paireNomJeux_(nomDev, ListeJeux{}) {}
-    ~Developpeur() { delete[] paireNomJeux_.second.elements; }
+    Developpeur(const std::string& nomDev) : nomDev_(nomDev), listeJeux_() {}
+    ~Developpeur() {}
 
-    std::string getNom() const { return paireNomJeux_.first; }
+    std::string getNom() const { return nomDev_; }
 
-    size_t compterJeux(const ListeJeux& listeJeux) const
+    size_t compterJeux(const Liste<Jeu>& listeJeux) const
     {
         size_t count = 0;
-        for (size_t i = 0; i < listeJeux.nElements; ++i)
+        for (size_t i = 0; i < listeJeux.taille(); ++i)
         {
-            if (listeJeux.elements[i]->developpeur == paireNomJeux_.first)
+            if (listeJeux[i]->developpeur == nomDev_)
             {
-                count++;
+                ++count;
             }
         }
         return count;
     }
 
-    void mettreAJourListeJeux(const ListeJeux& tousLesJeux)
+    void mettreAJourListeJeux(const Liste<Jeu>& listeJeux)
     {
-        delete[] paireNomJeux_.second.elements;
-        paireNomJeux_.second = ListeJeux{};
-
-        size_t count = compterJeux(tousLesJeux);
-        paireNomJeux_.second.elements  = new Jeu * [count];
-        paireNomJeux_.second.nElements = 0;
-        paireNomJeux_.second.capacite  = count;
-
-        for (size_t i = 0; i < tousLesJeux.nElements; ++i)
+        for (size_t i = 0; i < listeJeux.taille(); ++i)
         {
-            if (tousLesJeux.elements[i]->developpeur == paireNomJeux_.first)
+            if (listeJeux[i]->developpeur == nomDev_)
             {
-                if (paireNomJeux_.second.nElements < paireNomJeux_.second.capacite)
-                {
-                    paireNomJeux_.second.elements[paireNomJeux_.second.nElements++] = tousLesJeux.elements[i];
-                }
+                listeJeux_.ajouter(listeJeux[i]);
             }
         }
     }
 
     void afficherJeux() const
     {
-        for (size_t i = 0; i < paireNomJeux_.second.nElements; ++i)
+        for (size_t i = 0; i < listeJeux_.taille(); ++i)
         {
-            std::cout << paireNomJeux_.second.elements[i]->titre << std::endl;
+            std::cout << listeJeux_[i]->titre << std::endl;
         }
     }
 
 private:
-    std::pair<std::string, ListeJeux> paireNomJeux_;
+    std::string nomDev_;
+    Liste<Jeu> listeJeux_;
 };
+
+//class Developpeur
+//{
+//public:
+//    Developpeur(const std::string& nomDev) : nomDev_(nomDev) {}
+//
+//    std::string getNom() const { return nomDev_; }
+//
+//    size_t compterJeux() const { return listeJeux_.size(); }
+//
+//    void ajouterJeu(const std::shared_ptr<Jeu>& jeu) { listeJeux_.push_back(jeu); }
+//
+//    void supprimerJeu(const std::shared_ptr<Jeu>& jeu)
+//    {
+//        auto it = std::find(listeJeux_.begin(), listeJeux_.end(), jeu);
+//        if (it != listeJeux_.end())
+//        {
+//            listeJeux_.erase(it);
+//        }
+//    }
+//
+//    void afficherJeux() const
+//    {
+//        for (const auto& jeu : listeJeux_)
+//        {
+//            std::cout << jeu->getTitre() << std::endl;
+//        }
+//    }
+//
+//private:
+//    std::string nomDev_;
+//    std::vector<std::shared_ptr<Jeu>> listeJeux_;
+//};
