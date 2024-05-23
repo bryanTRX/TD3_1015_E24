@@ -1,17 +1,11 @@
 #pragma once 
 
-#ifndef LISTE_HPP
-#define LISTE_HPP
-
 #include <memory>
 #include <cstddef>
 #include <iostream>
 #include <algorithm>
 #include <stdexcept>
 #include "cppitertools/range.hpp"
-#include "Concepteur.hpp"
-#include "Developpeur.hpp"
-#include "Jeu.hpp"
 #include "gsl/span"
 
 using namespace std;
@@ -57,16 +51,22 @@ public:
 
 	void retirer(const shared_ptr<T>& aRetirer)
 	{
-		for (auto& d : enSpan())
+		bool elementTrouve = false;
+		for (size_t i = 0; i < nElements_; ++i)
 		{
-			if (d == aRetirer)
+			if (elements_[i] == aRetirer)
 			{
-				if (nElements_ > 1)
-				{
-					d = elements_[nElements_ - 1];
-				}
-				nElements_--;
+				elementTrouve = true;
+				elements_[i] = elements_[nElements_ - 1];
+				elements_[nElements_ - 1] = nullptr;
+				--nElements_;
+				break; 
 			}
+		}
+
+		if (!elementTrouve)
+		{
+			throw runtime_error("Element non trouvé dans la liste");
 		}
 	}
 
@@ -120,28 +120,10 @@ public:
 
 	gsl::span<shared_ptr<T>> enSpan() const { return gsl::span<shared_ptr<T>>(elements_.get(), nElements_); }
 
-	/*template <typename U>
-	friend gsl::span<shared_ptr<U>> spanListeJeux(const Liste<U>& liste);
-
-	template <typename W>
-	friend gsl::span<shared_ptr<W>> spanListeConcepteurs(const Liste<W>& liste);*/
-
 private:
 	size_t nElements_ = 0, capacite_ = 0;
 	unique_ptr<shared_ptr<T>[]> elements_;
 };
-
-//template <typename T>
-//gsl::span<shared_ptr<T>> spanListeJeux(const Liste<Jeu>& liste) 
-//{
-//	return { liste.elements_.get(), liste.nElements_ };
-//}
-//
-//template <typename T> 
-//gsl::span<shared_ptr<Concepteur>> spanListeConcepteurs(const Liste<Jeu>& liste)
-//{
-//	return { liste.elements_.get(), liste.nElements_ };
-//}
 
 template<typename T>
 ostream& operator<<(ostream& os, const Liste<T>& liste)
@@ -164,5 +146,3 @@ gsl::span<shared_ptr<T>> spanListeConcepteurs(const Liste<T>& liste)
 {
 	return liste.enSpan();
 }
-
-#endif
