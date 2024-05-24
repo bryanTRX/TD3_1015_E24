@@ -4,7 +4,7 @@
 #include "Jeu.hpp"
 #include "Liste.hpp"
 
-struct Jeu;
+class Jeu;
 
 class Developpeur
 {

@@ -13,7 +13,7 @@ Developpeur::~Developpeur() {}
 void Developpeur::ajouterJeux(Liste<Jeu>& listeJeux)
 {
 	paireNomJeux_.second.changerCapacite(compterJeuxDeveloppes(listeJeux));
-	for (shared_ptr<Jeu>& j : spanListeJeux(listeJeux))
+	for (shared_ptr<Jeu>& j : listeJeux.enSpan())
 	{
 		if (j->developpeur == getNom())
 		{
@@ -27,7 +27,7 @@ void Developpeur::afficher() const
 	cout << "\n" << getNom() << " a développé les jeux suivants :" << endl;
 	if (paireNomJeux_.second.taille() > 0)
 	{
-		for (shared_ptr<Jeu>& j : spanListeJeux(paireNomJeux_.second))
+		for (shared_ptr<Jeu>& j : paireNomJeux_.second.enSpan())
 			cout << "\t\033[33m" << j->titre << "\033[0m" << endl;
 	}
 	else
@@ -37,7 +37,7 @@ void Developpeur::afficher() const
 unsigned int Developpeur::compterJeuxDeveloppes(Liste<Jeu>& listeJeux)
 {
 	unsigned int n = 0;
-	for (shared_ptr<Jeu>& j : spanListeJeux(listeJeux))
+	for (shared_ptr<Jeu>& j : listeJeux.enSpan())
 	{
 		if (j->developpeur == getNom())
 			n++;

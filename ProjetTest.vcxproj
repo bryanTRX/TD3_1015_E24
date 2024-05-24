@@ -162,7 +162,6 @@
     <ClCompile Include="bibliotheque_cours\bibliotheque_cours.cpp" />
     <ClCompile Include="bibliotheque_cours\verification_allocation.cpp" />
     <ClCompile Include="Developpeur.cpp" />
-    <ClCompile Include="ListeDeveloppeurs.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -177,9 +176,6 @@
     <ClInclude Include="Developpeur.hpp" />
     <ClInclude Include="Jeu.hpp" />
     <ClInclude Include="Liste.hpp" />
-    <ClInclude Include="ListeConcepteurs.hpp" />
-    <ClInclude Include="ListeDeveloppeurs.hpp" />
-    <ClInclude Include="ListeJeux.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

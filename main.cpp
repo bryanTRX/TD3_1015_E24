@@ -1,4 +1,12 @@
-﻿#include "Jeu.hpp"
+﻿/**
+* Programme contenant le projet du TD3.
+* \file		main.cpp
+* \author	Iliass Khider et Bryan Alexandre Tavares
+* \date		21 mai 2024
+* Créé le	27 mai 2024
+*/
+
+#include "Jeu.hpp"
 #include "Developpeur.hpp"
 #include "Concepteur.hpp"
 #include "Liste.hpp"
@@ -48,16 +56,21 @@ string lireString(istream& fichier)
 }
 #pragma endregion
 
-shared_ptr<Concepteur> trouverConcepteur(const Liste<Jeu>& listeJeux, const string nom)
+shared_ptr<Concepteur> trouverConcepteur(const Liste<Jeu>& listeJeux, const string& nom)
 {
-	for (const shared_ptr<Jeu> j : spanListeJeux(listeJeux))
+	auto critere = [&](const shared_ptr<Concepteur>& concepteur) {
+		return concepteur->nom == nom;
+		};
+
+	for (const shared_ptr<Jeu>& jeu : listeJeux.enSpan())
 	{
-		for (shared_ptr<Concepteur> d : spanListeConcepteurs(j->concepteurs))
+		auto concepteur = jeu->chercherConcepteur(critere);
+		if (concepteur)
 		{
-			if (d->nom == nom)
-				return d;
+			return concepteur;
 		}
 	}
+
 	return nullptr;
 }
 
@@ -93,7 +106,8 @@ shared_ptr<Jeu> lireJeu(istream& fichier, Liste<Jeu>& listeJeux)
 
 	shared_ptr<Jeu> nouveauJeu = make_shared<Jeu>(jeu);
 
-	cout << "\033[96m" << "Allocation en mémoire du jeu " << nouveauJeu->titre << "\033[0m" << endl;
+	cout << "\n\033[32m═════════════════\033[0m " << "\033[32m" << nouveauJeu->titre << "\033[0m" << " \033[32m═════════════════\033[0m\n";
+	cout << "Nouveau jeu créé    : " << nouveauJeu->titre << endl;
 
 	nouveauJeu->concepteurs.changerCapacite(nConcepteurs); 
 	for (size_t i = 0; i < nConcepteurs; ++i)
@@ -140,7 +154,10 @@ bool encorePresentDansUnJeu(shared_ptr<Concepteur> concepteur)
 
 void detruireJeu(shared_ptr<Jeu> jeu)
 {
-	for (shared_ptr<Concepteur> c : spanListeConcepteurs(jeu->concepteurs))
+	cout << "\n\033[31m═════════════════\033[0m " << "\033[31m" << jeu->titre << "\033[0m" << " \033[31m═════════════════\033[0m\n";
+	cout << "Jeu supprime       : " << jeu->titre << endl;
+
+	for (shared_ptr<Concepteur> c : jeu->concepteurs.enSpan())
 	{
 		c->jeuxConcus.retirer(jeu);
 		if (!encorePresentDansUnJeu(c))
@@ -148,13 +165,11 @@ void detruireJeu(shared_ptr<Jeu> jeu)
 			detruireConcepteur(c);
 		}
 	}
-
-	cout << "\033[31m" << "Destruction du jeu " << jeu->titre << "\033[0m" << endl;
 }
 
 void detruireListeJeux(Liste<Jeu>& liste)
 {
-	for (shared_ptr<Jeu> j : spanListeJeux(liste))
+	for (shared_ptr<Jeu> j : liste.enSpan())
 	{
 		detruireJeu(j);
 	}
@@ -167,28 +182,37 @@ void afficherConcepteur(const Concepteur& concepteur)
 
 void afficherInfosJeu(const Jeu& jeu)
 {
-	cout << "Titre           : " << "\033[94m" << jeu.titre << "\033[0m" << endl;
-	cout << "Developpeur     : " << "\033[94m" << jeu.developpeur << "\033[0m" << endl;
-	cout << "Annee de sortie : " << "\033[94m" << jeu.anneeSortie << "\033[0m" << endl;
+	cout << "Titre           : " << jeu.titre << endl;
+	cout << "Developpeur     : " << jeu.developpeur << endl;
+	cout << "Annee de sortie : " << jeu.anneeSortie << endl;
 	
-	cout << "Concepteurs : " << "\033[94m" << endl;
-	for (const shared_ptr<Concepteur> c : spanListeConcepteurs(jeu.concepteurs))
+	cout << "Concepteurs : " << endl;
+	for (const shared_ptr<Concepteur> c : jeu.concepteurs.enSpan())
 	{
 		afficherConcepteur(*c);
 	}
-	cout << "\033[0m";
 }
 
 void afficherListeJeux(const Liste<Jeu>& listeJeux)
 {
-	static const string ligneSeparation = "\n\033[95m""══════════════════════════════════════════════════════════════════════════""\033[0m\n";
-	cout << ligneSeparation;
+	static const string ligneDeSeparation = "\n\033[34m════════════════════════════════════════════════════════\033[0m\n";
+	cout << ligneDeSeparation;
 
-	for (const shared_ptr<Jeu> j : spanListeJeux(listeJeux))
+	for (const shared_ptr<Jeu> j : listeJeux.enSpan())
 	{
 		afficherInfosJeu(*j);
-		cout << ligneSeparation;
+		cout << ligneDeSeparation;
 	}
+}
+
+template<typename T>
+ostream& operator<<(ostream& os, const Liste<T>& liste)
+{
+    for (const auto& element : liste.enSpan())
+    {
+        os << *element << endl;
+    }
+    return os;
 }
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
@@ -200,50 +224,105 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 	bibliotheque_cours::activerCouleursAnsi();
 #pragma endregion
 
-	// Pour vérifier que la détection de fuites fonctionne; un message devrait dire qu'il y a une fuite à cette ligne.
+	static const string ligneDeSeparation = "\n\033[96m════════════════════════════════════════════════════════\033[0m\n";
 
-	Liste<Jeu> lj = creerListeJeux("jeux.bin"); //TODO: Appeler correctement votre fonction de création de la liste de jeux.
+	static const string ligneSeparationCreation = "\n\033[35m═══════════════════ Creation de ma liste de jeu ═════════════════════\033[0m\n";
+	cout << ligneSeparationCreation;
 
-	static const string ligneSeparation = "\n\033[35m════════════════════════════════════════\033[0m\n";
-	cout << ligneSeparation << endl;
+	Liste<Jeu> listeJeux = creerListeJeux("jeux.bin"); 
 
-	cout << "\033[94m Test surchage operator[] : \033[0m" << endl;
-	//TODO: Afficher le premier jeu de la liste (en utilisant la fonction).  Devrait être Chrono Trigger.
-	afficherInfosJeu(*lj[2]);
-	cout << ligneSeparation << endl;
+	// --------------------------------------------- Affichage de ma liste ---------------------------------------------
+	
+	static const string ligneSeparationContenu= "\n\033[35m═══════════════════ Affichage du contenu de ma liste de jeu ═════════════════════\033[0m\n";
+	cout << ligneSeparationContenu;
 
-	//TODO: Appel à votre fonction d'affichage de votre liste de jeux.
-	afficherListeJeux(lj);
+	afficherListeJeux(listeJeux);
 
-	//TODO: Faire les appels à toutes vos fonctions/méthodes pour voir qu'elles fonctionnent et avoir 0% de lignes non exécutées dans le programme (aucune ligne rouge dans la couverture de code; c'est normal que les lignes de "new" et "delete" soient jaunes).  Vous avez aussi le droit d'effacer les lignes du programmes qui ne sont pas exécutée, si finalement vous pensez qu'elle ne sont pas utiles.
+	// --------------------------------------------- Test pour la surchage de [] ---------------------------------------------
 
-	//Liste<Developpeur> ld;
+	static const string ligneSeparationSurchage = "\n\033[35m═══════════════════ Test surchage operator[] ═════════════════════\033[0m\n";
+	cout << ligneSeparationSurchage;
 
-	//// Création des développeurs avec shared_ptr
-	//auto nintendo = make_shared<Developpeur>("Nintendo");
-	//auto square   = make_shared<Developpeur>("Square");
-	//auto konami   = make_shared<Developpeur>("Konami");
-	//auto bidon    = make_shared<Developpeur>("Bidon");
+	cout << ligneDeSeparation;
+	afficherInfosJeu(*listeJeux[2]);
+	cout << ligneDeSeparation << endl;
 
-	//// On ajoute les jeux respectifs de ListeJeux développé par le développeur
-	//nintendo->ajouterJeux(lj);
-	//square->ajouterJeux(lj);
-	//konami->ajouterJeux(lj);
+	// --------------------------------------------- Test pour la fonction trouverConcepteur ---------------------------------------------
 
-	//// On ajoute les développeurs à la ListeDeveloppeur car ils sont externes
-	//ld.ajouter(nintendo);
-	//ld.ajouter(square);
-	//ld.ajouter(konami);
-	//ld.ajouter(bidon);
+	static const string ligneSeparationTestFonction = "\n\033[35m═══════════════════ Test de la fonction trouverConcepteur ═════════════════════\033[0m\n";
+	cout << ligneSeparationTestFonction;
 
-	//// On affiche la liste des développeurs, leurs jeux sont aussi affichés; Bidon ne devrait avoir aucun jeu.
-	//ld.afficher();
+	auto concepteurTrouve = trouverConcepteur(listeJeux, "Yoshinori Kitase");
 
-	//cout << endl << "On retire " << bidon->getNom() << endl;
-	//ld.retirer(bidon); // Retire sans détruire.
-	//ld.afficher();
-	//cout << "Il existe encore: " << bidon->getNom() << endl;
+	if (concepteurTrouve)
+	{
+		cout << ligneDeSeparation;
+		cout << "Nom du concepteur rechercher : " << concepteurTrouve->nom << " et puis son année de naissance : " << concepteurTrouve->anneeNaissance << endl;
+		
+		if (listeJeux[0]->concepteurs[0] == listeJeux[1]->concepteurs[0])
+		{
+			cout << "Les deux jeux renvoient un pointeur vers la même adresse pour le concepteur.";
+			cout << endl <<ligneDeSeparation;
+		}
+		else
+		{
+			cout << "Les deux jeux ne renvoient pas un pointeur vers la même adresse pour le concepteur.";
+			cout << endl << ligneDeSeparation;
+		}
+	}
+	
+	else
+	{
+		cout << "Concepteur non trouvé.";
+		cout << endl << ligneDeSeparation;
+	}
 
-	//TODO: Détruire tout avant de terminer le programme.  Devrait afficher "Aucune fuite detectee." a la sortie du programme; il affichera "Fuite detectee:" avec la liste des blocs, s'il manque des delete.
-	detruireListeJeux(lj);
+	// --------------------------------------------- Affichage à l'aide du cout ---------------------------------------------
+
+	static const string ligneSeparationCout = "\n\033[35m═══════════════════ Affichage à l'aide de la surchage operator<< ═════════════════════\033[0m\n";
+	cout << endl << ligneSeparationCout;
+
+	cout << ligneDeSeparation << listeJeux << ligneDeSeparation;
+
+	// --------------------------------------------- Test de la copie de jeu ---------------------------------------------
+
+	static const string ligneSeparationCopie = "\n\033[35m═══════════════════ Test de la copie de jeu ═════════════════════\033[0m\n";
+	cout << endl << ligneSeparationCopie;
+
+	shared_ptr<Jeu> jeuOriginal = listeJeux[2]; 
+	shared_ptr<Jeu> copieJeu = make_shared<Jeu>(*jeuOriginal); 
+
+	shared_ptr<Concepteur> nouveauConcepteur = listeJeux[0]->concepteurs[1];
+
+	copieJeu->concepteurs[1] = nouveauConcepteur;
+
+	cout << "Jeu original à l'indice 2 :" << endl;
+	afficherInfosJeu(*jeuOriginal);
+	cout << endl;
+
+	cout << "Copie du jeu modifiée :" << endl;
+	afficherInfosJeu(*copieJeu);
+	cout << endl;
+
+	if (jeuOriginal->concepteurs[0] == copieJeu->concepteurs[0])
+	{
+		cout << "Les adresses du premier concepteur dans les deux jeux sont les mêmes." << endl;
+	}
+
+	else
+	{
+		cout << "Les adresses du premier concepteur dans les deux jeux ne sont pas les mêmes." << endl;
+	}
+
+	// --------------------------------------------- Destruction de ma liste de jeu ---------------------------------------------
+
+	static const string ligneSeparationDestruction = "\n\033[35m═══════════════════ Destruction de ma liste de jeu ═════════════════════\033[0m\n";
+	cout << ligneSeparationDestruction;
+
+	detruireListeJeux(listeJeux);
 }
+
+// Je n'ai pas trop compris ce que vous voulez dire dans 7) 
+// Lorsqu'on fait l'affichage avec le cout est-ce vous voulez exactement le meme modele que celui du TP2 
+// Les surchages d'operator<< de Jeu et Concepteur doivent egalement etre dans le main ou on peut les laisser dans le hpp 
+// 

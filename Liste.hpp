@@ -3,8 +3,6 @@
 #include <memory>
 #include <cstddef>
 #include <iostream>
-#include <algorithm>
-#include <stdexcept>
 #include "cppitertools/range.hpp"
 #include "gsl/span"
 
@@ -32,14 +30,6 @@ public:
 
 	// Methodes ---------------------------------------------------------------------------------
 
-	void afficher() const
-	{
-		for (auto& element : enSpan())
-		{
-			element->afficher();
-		}
-	}
-
 	void ajouter(const shared_ptr<T>& element)
 	{
 		if (nElements_ >= capacite_)
@@ -62,11 +52,6 @@ public:
 				--nElements_;
 				break; 
 			}
-		}
-
-		if (!elementTrouve)
-		{
-			throw runtime_error("Element non trouvé dans la liste");
 		}
 	}
 
@@ -97,15 +82,21 @@ public:
 		return elements_[index];
 	}
 
-	template<typename Function>
-	shared_ptr<T> chercherElement(Function critere) const
+	template <typename Critere>
+	shared_ptr<T> chercherElement(Critere critere) const
 	{
-		auto it = find_if(elements_.get(), elements_.get() + nElements_, critere);
-		return it != elements_.get() + nElements_ ? *it : nullptr;
+		for (const auto& element : enSpan())
+		{
+			if (critere(element))
+			{
+				return element;
+			}
+		}
+		return nullptr;
 	}
 
-	template<typename Function>
-	shared_ptr<T> chercherElement(Function critere, Liste& autreListe)
+	template<typename Critere>
+	shared_ptr<T> chercherElement(Critere critere, Liste& autreListe)
 	{
 		auto element = chercherElement(critere);
 		if (element)
@@ -124,25 +115,3 @@ private:
 	size_t nElements_ = 0, capacite_ = 0;
 	unique_ptr<shared_ptr<T>[]> elements_;
 };
-
-template<typename T>
-ostream& operator<<(ostream& os, const Liste<T>& liste)
-{
-	for (size_t i = 0; i < liste.taille(); ++i)
-	{
-		os << *(liste.elements_[i]) << endl;
-	}
-	return os;
-}
-
-template <typename T>
-gsl::span<shared_ptr<T>> spanListeJeux(const Liste<T>& liste)
-{
-	return liste.enSpan();
-}
-
-template <typename T>
-gsl::span<shared_ptr<T>> spanListeConcepteurs(const Liste<T>& liste)
-{
-	return liste.enSpan();
-}

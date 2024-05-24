@@ -29,9 +29,6 @@
     <ClCompile Include="Developpeur.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ListeDeveloppeurs.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
@@ -52,15 +49,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Jeu.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ListeConcepteurs.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ListeDeveloppeurs.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ListeJeux.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Liste.hpp">
