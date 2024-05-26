@@ -1,4 +1,5 @@
 ﻿#pragma once
+
 #include <string>
 #include "Jeu.hpp"
 #include "Liste.hpp"
@@ -12,9 +13,5 @@ struct Concepteur
 	std::string pays;
 	Liste<Jeu> jeuxConcus;
 
-	friend ostream& operator<<(ostream& os, const Concepteur& concepteur)
-	{
-		os << "Nom: " << concepteur.nom << ", Année de naissance: " << concepteur.anneeNaissance << ", Pays: " << concepteur.pays;
-		return os;
-	}
+	friend ostream& operator<<(ostream& os, const Concepteur& concepteur);
 };

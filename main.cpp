@@ -19,7 +19,7 @@
 #include "bibliotheque_cours.hpp"
 #include "verification_allocation.hpp"
 #include "ListeDeveloppeurs.hpp"
-#include "debogage_memoire.hpp"  //NOTE: Incompatible avec le "placement new", ne pas utiliser cette entête si vous utilisez ce type de "new" dans les lignes qui suivent cette inclusion.
+#include "debogage_memoire.hpp"  
 
 using namespace std;
 using namespace iter;
@@ -58,13 +58,9 @@ string lireString(istream& fichier)
 
 shared_ptr<Concepteur> trouverConcepteur(const Liste<Jeu>& listeJeux, const string& nom)
 {
-	auto critere = [&](const shared_ptr<Concepteur>& concepteur) {
-		return concepteur->nom == nom;
-		};
-
 	for (const shared_ptr<Jeu>& jeu : listeJeux.enSpan())
 	{
-		auto concepteur = jeu->chercherConcepteur(critere);
+		auto concepteur = jeu->chercherConcepteur([&](const shared_ptr<Concepteur>& concepteur) { return concepteur->nom == nom; });
 		if (concepteur)
 		{
 			return concepteur;
@@ -157,21 +153,21 @@ void detruireJeu(shared_ptr<Jeu> jeu)
 	cout << "\n\033[31m═════════════════\033[0m " << "\033[31m" << jeu->titre << "\033[0m" << " \033[31m═════════════════\033[0m\n";
 	cout << "Jeu supprime       : " << jeu->titre << endl;
 
-	for (shared_ptr<Concepteur> c : jeu->concepteurs.enSpan())
+	for (shared_ptr<Concepteur> concepteur : jeu->concepteurs.enSpan())
 	{
-		c->jeuxConcus.retirer(jeu);
-		if (!encorePresentDansUnJeu(c))
+		concepteur->jeuxConcus.retirer(jeu);
+		if (!encorePresentDansUnJeu(concepteur))
 		{
-			detruireConcepteur(c);
+			detruireConcepteur(concepteur);
 		}
 	}
 }
 
 void detruireListeJeux(Liste<Jeu>& liste)
 {
-	for (shared_ptr<Jeu> j : liste.enSpan())
+	for (shared_ptr<Jeu> jeu : liste.enSpan())
 	{
-		detruireJeu(j);
+		detruireJeu(jeu);
 	}
 }
 
@@ -187,9 +183,9 @@ void afficherInfosJeu(const Jeu& jeu)
 	cout << "Annee de sortie : " << jeu.anneeSortie << endl;
 	
 	cout << "Concepteurs : " << endl;
-	for (const shared_ptr<Concepteur> c : jeu.concepteurs.enSpan())
+	for (const shared_ptr<Concepteur> concepteur : jeu.concepteurs.enSpan())
 	{
-		afficherConcepteur(*c);
+		afficherConcepteur(*concepteur);
 	}
 }
 
@@ -198,21 +194,41 @@ void afficherListeJeux(const Liste<Jeu>& listeJeux)
 	static const string ligneDeSeparation = "\n\033[34m════════════════════════════════════════════════════════\033[0m\n";
 	cout << ligneDeSeparation;
 
-	for (const shared_ptr<Jeu> j : listeJeux.enSpan())
+	for (const shared_ptr<Jeu> jeu : listeJeux.enSpan())
 	{
-		afficherInfosJeu(*j);
+		afficherInfosJeu(*jeu);
 		cout << ligneDeSeparation;
 	}
+}
+
+ostream& operator<<(ostream& os, const Concepteur& concepteur)
+{
+	os << "\t" << concepteur.nom << ", " << concepteur.anneeNaissance << ", " << concepteur.pays;
+	return os;
+}
+
+ostream& operator<<(ostream& os, const Jeu& jeu)
+{
+	os << "Titre           : " << jeu.titre << endl;
+	os << "Developpeur     : " << jeu.developpeur << endl;
+	os << "Annee de sortie : " << jeu.anneeSortie << endl;
+
+	os << "Concepteurs :" << endl;
+	for (const auto& concepteur : jeu.concepteurs.enSpan())
+	{
+		os << *concepteur << endl;
+	}
+	return os;
 }
 
 template<typename T>
 ostream& operator<<(ostream& os, const Liste<T>& liste)
 {
-    for (const auto& element : liste.enSpan())
-    {
-        os << *element << endl;
-    }
-    return os;
+	for (const auto& element : liste.enSpan())
+	{
+		os << *element << endl;
+	}
+	return os;
 }
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
@@ -227,21 +243,21 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 	static const string ligneDeSeparation = "\n\033[96m════════════════════════════════════════════════════════\033[0m\n";
 
 	static const string ligneSeparationCreation = "\n\033[35m═══════════════════ Creation de ma liste de jeu ═════════════════════\033[0m\n";
-	cout << ligneSeparationCreation;
+	cout << endl << ligneSeparationCreation;
 
 	Liste<Jeu> listeJeux = creerListeJeux("jeux.bin"); 
 
 	// --------------------------------------------- Affichage de ma liste ---------------------------------------------
 	
 	static const string ligneSeparationContenu= "\n\033[35m═══════════════════ Affichage du contenu de ma liste de jeu ═════════════════════\033[0m\n";
-	cout << ligneSeparationContenu;
+	cout << endl << ligneSeparationContenu;
 
 	afficherListeJeux(listeJeux);
 
 	// --------------------------------------------- Test pour la surchage de [] ---------------------------------------------
 
 	static const string ligneSeparationSurchage = "\n\033[35m═══════════════════ Test surchage operator[] ═════════════════════\033[0m\n";
-	cout << ligneSeparationSurchage;
+	cout << endl << ligneSeparationSurchage;
 
 	cout << ligneDeSeparation;
 	afficherInfosJeu(*listeJeux[2]);
@@ -250,7 +266,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 	// --------------------------------------------- Test pour la fonction trouverConcepteur ---------------------------------------------
 
 	static const string ligneSeparationTestFonction = "\n\033[35m═══════════════════ Test de la fonction trouverConcepteur ═════════════════════\033[0m\n";
-	cout << ligneSeparationTestFonction;
+	cout << endl << ligneSeparationTestFonction;
 
 	auto concepteurTrouve = trouverConcepteur(listeJeux, "Yoshinori Kitase");
 
@@ -264,6 +280,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 			cout << "Les deux jeux renvoient un pointeur vers la même adresse pour le concepteur.";
 			cout << endl <<ligneDeSeparation;
 		}
+
 		else
 		{
 			cout << "Les deux jeux ne renvoient pas un pointeur vers la même adresse pour le concepteur.";
@@ -322,7 +339,3 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 	detruireListeJeux(listeJeux);
 }
 
-// Je n'ai pas trop compris ce que vous voulez dire dans 7) 
-// Lorsqu'on fait l'affichage avec le cout est-ce vous voulez exactement le meme modele que celui du TP2 
-// Les surchages d'operator<< de Jeu et Concepteur doivent egalement etre dans le main ou on peut les laisser dans le hpp 
-// 

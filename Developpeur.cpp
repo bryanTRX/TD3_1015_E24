@@ -2,7 +2,7 @@
 #include "Jeu.hpp"
 #include "cppitertools/range.hpp"
 #include <iostream>
-#include "debogage_memoire.hpp"  //NOTE: Incompatible avec le "placement new", ne pas utiliser cette entête si vous utilisez ce type de "new" dans les lignes qui suivent cette inclusion.
+#include "debogage_memoire.hpp"  
 
 using namespace std;
 
@@ -27,7 +27,7 @@ void Developpeur::afficher() const
 	cout << "\n" << getNom() << " a développé les jeux suivants :" << endl;
 	if (paireNomJeux_.second.taille() > 0)
 	{
-		for (shared_ptr<Jeu>& j : paireNomJeux_.second.enSpan())
+		for (shared_ptr<Jeu>& j : paireNomJeux_.second.enSpan()) 
 			cout << "\t\033[33m" << j->titre << "\033[0m" << endl;
 	}
 	else

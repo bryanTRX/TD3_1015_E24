@@ -15,8 +15,8 @@ public:
 	// Constructeurs ----------------------------------------------------------------------------
 
 	Liste() : capacite_(0), nElements_(0), elements_(nullptr) {}
-	Liste(size_t nElementsInitiales, size_t capaciteInitiale) : nElements_(nElementsInitiales), capacite_(capaciteInitiale), elements_(new shared_ptr<T>[capaciteInitiale]) {}
-	Liste(const Liste& other) : capacite_(other.capacite_), nElements_(other.nElements_), elements_(new shared_ptr<T>[other.capacite_])
+	Liste(size_t nElementsInitiales, size_t capaciteInitiale) : nElements_(nElementsInitiales), capacite_(capaciteInitiale), elements_(make_unique<shared_ptr<T>[]>(capaciteInitiale)) {}
+	Liste(const Liste& other) : capacite_(other.capacite_), nElements_(other.nElements_), elements_(make_unique<shared_ptr<T>[]>(other.capacite_))
 	{
 		if (capacite_ != 0 && nElements_ != 0)
 		{
@@ -58,7 +58,7 @@ public:
 	void changerCapacite(size_t nouvelleCapacite)
 	{
 		assert(nouvelleCapacite >= nElements_);
-		unique_ptr<shared_ptr<T>[]> nouvelleListe(new shared_ptr<T>[nouvelleCapacite]);
+		unique_ptr<shared_ptr<T>[]> nouvelleListe(make_unique<shared_ptr<T>[]>(nouvelleCapacite));
 
 		for (size_t i : iter::range(nElements_))
 		{
@@ -106,8 +106,8 @@ public:
 		return element;
 	}
 
-	template<typename U>
-	friend ostream& operator<<(ostream& os, const Liste<U>& liste);
+	template<typename T>
+	friend ostream& operator<<(ostream& os, const Liste<T>& liste);
 
 	gsl::span<shared_ptr<T>> enSpan() const { return gsl::span<shared_ptr<T>>(elements_.get(), nElements_); }
 
