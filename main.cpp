@@ -240,21 +240,58 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 	bibliotheque_cours::activerCouleursAnsi();
 #pragma endregion
 
+
+	// --------------------------------------------- Question 2 ---------------------------------------------
+
+	static const string ligneSeparationGenerique = "\n\033[35m═══════════════════ Test de notre classe générique avec Liste<int> ═════════════════════\033[0m\n";
+	cout << endl << ligneSeparationGenerique;
+
+	Liste<int> listeEntiers;
+
+	listeEntiers.ajouter(make_shared<int>(10));
+	listeEntiers.ajouter(make_shared<int>(20));
+	listeEntiers.ajouter(make_shared<int>(30));
+
+	cout << "Liste : {";
+	for (int elem = 0; elem < listeEntiers.taille(); ++elem)
+	{
+		cout << *listeEntiers[elem];
+		if (elem < listeEntiers.taille() - 1)
+		{
+			cout << ", ";
+		}
+	}
+	cout << "}" << endl;
+
+	auto trouve = listeEntiers.chercherElement([](const shared_ptr<int>& element) { return *element == 20; });
+
+	if (trouve)
+	{
+		cout << "Element trouve : " << *trouve << endl;
+	}
+
+	else
+	{
+		cout << "Element non trouve" << endl;
+	}
+
+
 	static const string ligneDeSeparation = "\n\033[96m════════════════════════════════════════════════════════\033[0m\n";
 
 	static const string ligneSeparationCreation = "\n\033[35m═══════════════════ Creation de ma liste de jeu ═════════════════════\033[0m\n";
 	cout << endl << ligneSeparationCreation;
 
-	Liste<Jeu> listeJeux = creerListeJeux("jeux.bin"); 
+	Liste<Jeu> listeJeux = creerListeJeux("jeux.bin");
 
 	// --------------------------------------------- Affichage de ma liste ---------------------------------------------
-	
-	static const string ligneSeparationContenu= "\n\033[35m═══════════════════ Affichage du contenu de ma liste de jeu ═════════════════════\033[0m\n";
+
+	static const string ligneSeparationContenu = "\n\033[35m═══════════════════ Affichage du contenu de ma liste de jeu ═════════════════════\033[0m\n";
 	cout << endl << ligneSeparationContenu;
 
 	afficherListeJeux(listeJeux);
 
-	// --------------------------------------------- Test pour la surchage de [] ---------------------------------------------
+	// --------------------------------------------- Question 4 : Test pour la surchage de [] ------------------------------------------------
+	//permettant un accès direct aux éléments de la liste, simplifiant l'accès et l'itération, comme illustré dans le test de validation.
 
 	static const string ligneSeparationSurchage = "\n\033[35m═══════════════════ Test surchage operator[] ═════════════════════\033[0m\n";
 	cout << endl << ligneSeparationSurchage;
@@ -263,7 +300,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 	afficherInfosJeu(*listeJeux[2]);
 	cout << ligneDeSeparation << endl;
 
-	// --------------------------------------------- Test pour la fonction trouverConcepteur ---------------------------------------------
+	// --------------------------------------------- Question 5 : Test pour la fonction trouverConcepteur ---------------------------------------------
+	// Test pour la fonction trouverConcepteur à l'aide de la méthode de recherche générique facilitant la recherche et la manipulation d'éléments dans la liste sans duplication de données. Dans ce cas nous cherchons le concepteur Yoshinori Kitase.
 
 	static const string ligneSeparationTestFonction = "\n\033[35m═══════════════════ Test de la fonction trouverConcepteur ═════════════════════\033[0m\n";
 	cout << endl << ligneSeparationTestFonction;
@@ -274,11 +312,11 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 	{
 		cout << ligneDeSeparation;
 		cout << "Nom du concepteur rechercher : " << concepteurTrouve->nom << " et puis son année de naissance : " << concepteurTrouve->anneeNaissance << endl;
-		
+
 		if (listeJeux[0]->concepteurs[0] == listeJeux[1]->concepteurs[0])
 		{
 			cout << "Les deux jeux renvoient un pointeur vers la même adresse pour le concepteur.";
-			cout << endl <<ligneDeSeparation;
+			cout << endl << ligneDeSeparation;
 		}
 
 		else
@@ -287,41 +325,38 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 			cout << endl << ligneDeSeparation;
 		}
 	}
-	
+
 	else
 	{
 		cout << "Concepteur non trouvé.";
 		cout << endl << ligneDeSeparation;
 	}
 
-	// --------------------------------------------- Affichage à l'aide du cout ---------------------------------------------
+	// --------------------------------------------- Question 6 : Affichage à l'aide du cout ---------------------------------------------
+	// La surcharge de l'opérateur << permet d'afficher directement les listes de jeux et de concepteurs.
 
 	static const string ligneSeparationCout = "\n\033[35m═══════════════════ Affichage à l'aide de la surchage operator<< ═════════════════════\033[0m\n";
 	cout << endl << ligneSeparationCout;
 
 	cout << ligneDeSeparation << listeJeux << ligneDeSeparation;
 
-	// --------------------------------------------- Test de la copie de jeu ---------------------------------------------
+	// --------------------------------------------- Question 7 : Test de la copie de jeu ---------------------------------------------
+	// Ce test démontre la copie d'un jeu et la modification de ses concepteurs. La sortie montre que les listes de concepteurs des jeux original et copié sont distinctes.
 
 	static const string ligneSeparationCopie = "\n\033[35m═══════════════════ Test de la copie de jeu ═════════════════════\033[0m\n";
 	cout << endl << ligneSeparationCopie;
 
-	shared_ptr<Jeu> jeuOriginal = listeJeux[2]; 
-	shared_ptr<Jeu> copieJeu = make_shared<Jeu>(*jeuOriginal); 
+	Jeu jeuOriginal = *listeJeux[2];
+	Jeu copieJeu = jeuOriginal;
 
-	shared_ptr<Concepteur> nouveauConcepteur = listeJeux[0]->concepteurs[1];
+	cout << "Jeu original à l'indice 2 :\n" << jeuOriginal << endl;
 
-	copieJeu->concepteurs[1] = nouveauConcepteur;
+	Concepteur nouveauConcepteur = *listeJeux[0]->concepteurs[2];
+	*copieJeu.concepteurs[1] = nouveauConcepteur;
 
-	cout << "Jeu original à l'indice 2 :" << endl;
-	afficherInfosJeu(*jeuOriginal);
-	cout << endl;
+	cout << "Copie du jeu modifiée :\n" << copieJeu << endl;
 
-	cout << "Copie du jeu modifiée :" << endl;
-	afficherInfosJeu(*copieJeu);
-	cout << endl;
-
-	if (jeuOriginal->concepteurs[0] == copieJeu->concepteurs[0])
+	if (jeuOriginal.concepteurs[0] == copieJeu.concepteurs[0])
 	{
 		cout << "Les adresses du premier concepteur dans les deux jeux sont les mêmes." << endl;
 	}
@@ -338,4 +373,3 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 
 	detruireListeJeux(listeJeux);
 }
-

@@ -4,7 +4,7 @@
 #include "Concepteur.hpp"
 #include "Liste.hpp"
 
-struct Concepteur;
+class Concepteur;
 
 class Jeu
 {

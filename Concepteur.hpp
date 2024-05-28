@@ -6,8 +6,9 @@
 
 class Jeu;
 
-struct Concepteur
+class Concepteur
 {
+public:
 	std::string nom;
 	int anneeNaissance;
 	std::string pays;

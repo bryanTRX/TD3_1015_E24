@@ -109,6 +109,20 @@ public:
 	template<typename T>
 	friend ostream& operator<<(ostream& os, const Liste<T>& liste);
 
+	Liste& operator=(const Liste& other)
+	{
+		if (this != &other)
+		{
+			capacite_ = other.capacite_;
+			nElements_ = other.nElements_;
+			elements_ = make_unique<shared_ptr<T>[]>(capacite_);
+			for (size_t i = 0; i < nElements_; ++i) {
+				elements_[i] = make_shared<T>(*other.elements_[i]);
+			}
+		}
+		return *this;
+	}
+
 	gsl::span<shared_ptr<T>> enSpan() const { return gsl::span<shared_ptr<T>>(elements_.get(), nElements_); }
 
 private:
