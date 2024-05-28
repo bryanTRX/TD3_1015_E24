@@ -26,6 +26,10 @@ public:
 			}
 		}
 	}
+	Liste(Liste<T>&& other) = default;
+
+	// Destructeurs -----------------------------------------------------------------------------
+
 	~Liste() = default;
 
 	// Methodes ---------------------------------------------------------------------------------
@@ -41,16 +45,14 @@ public:
 
 	void retirer(const shared_ptr<T>& aRetirer)
 	{
-		bool elementTrouve = false;
 		for (size_t i = 0; i < nElements_; ++i)
 		{
 			if (elements_[i] == aRetirer)
 			{
-				elementTrouve = true;
 				elements_[i] = elements_[nElements_ - 1];
 				elements_[nElements_ - 1] = nullptr;
 				--nElements_;
-				break; 
+				break;
 			}
 		}
 	}
@@ -68,17 +70,9 @@ public:
 		capacite_ = nouvelleCapacite;
 	}
 
-	size_t taille() const
-	{
-		return nElements_;
-	}
-
 	shared_ptr<T> operator[](size_t index) const
 	{
-		if (index >= nElements_)
-		{
-			throw out_of_range("Index hors limite");
-		}
+		assert(0 <= index && index < nElements_);
 		return elements_[index];
 	}
 
@@ -125,7 +119,6 @@ public:
 
 	gsl::span<shared_ptr<T>> enSpan() const { return gsl::span<shared_ptr<T>>(elements_.get(), nElements_); }
 
-private:
 	size_t nElements_ = 0, capacite_ = 0;
 	unique_ptr<shared_ptr<T>[]> elements_;
 };

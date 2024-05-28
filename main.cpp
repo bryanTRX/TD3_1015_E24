@@ -18,7 +18,6 @@
 #include "gsl/span"
 #include "bibliotheque_cours.hpp"
 #include "verification_allocation.hpp"
-#include "ListeDeveloppeurs.hpp"
 #include "debogage_memoire.hpp"  
 
 using namespace std;
@@ -130,7 +129,7 @@ Liste<Jeu> creerListeJeux(const string& nomFichier)
 	return listeJeux;
 }
 
-void detruireConcepteur(shared_ptr<Concepteur> concepteur)
+void retirerConcepteur(shared_ptr<Concepteur> concepteur)
 {
 	if (concepteur)
 	{
@@ -145,10 +144,10 @@ void detruireConcepteur(shared_ptr<Concepteur> concepteur)
 
 bool encorePresentDansUnJeu(shared_ptr<Concepteur> concepteur)
 {
-	return concepteur->jeuxConcus.taille() != 0;
+	return concepteur->jeuxConcus.nElements_ != 0;
 }
 
-void detruireJeu(shared_ptr<Jeu> jeu)
+void retirerJeu(shared_ptr<Jeu> jeu)
 {
 	cout << "\n\033[31m═════════════════\033[0m " << "\033[31m" << jeu->titre << "\033[0m" << " \033[31m═════════════════\033[0m\n";
 	cout << "Jeu supprime       : " << jeu->titre << endl;
@@ -158,16 +157,16 @@ void detruireJeu(shared_ptr<Jeu> jeu)
 		concepteur->jeuxConcus.retirer(jeu);
 		if (!encorePresentDansUnJeu(concepteur))
 		{
-			detruireConcepteur(concepteur);
+			retirerConcepteur(concepteur);
 		}
 	}
 }
 
-void detruireListeJeux(Liste<Jeu>& liste)
+void retirerListeJeux(Liste<Jeu>& liste)
 {
 	for (shared_ptr<Jeu> jeu : liste.enSpan())
 	{
-		detruireJeu(jeu);
+		retirerJeu(jeu);
 	}
 }
 
@@ -240,11 +239,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 	bibliotheque_cours::activerCouleursAnsi();
 #pragma endregion
 
+	static const string ligneDeSeparation = "\n\033[96m════════════════════════════════════════════════════════\033[0m\n";
 
 	// --------------------------------------------- Question 2 ---------------------------------------------
 
 	static const string ligneSeparationGenerique = "\n\033[35m═══════════════════ Test de notre classe générique avec Liste<int> ═════════════════════\033[0m\n";
 	cout << endl << ligneSeparationGenerique;
+	cout << ligneDeSeparation;
 
 	Liste<int> listeEntiers;
 
@@ -253,10 +254,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 	listeEntiers.ajouter(make_shared<int>(30));
 
 	cout << "Liste : {";
-	for (int elem = 0; elem < listeEntiers.taille(); ++elem)
+	for (int elem = 0; elem < listeEntiers.nElements_; ++elem)
 	{
 		cout << *listeEntiers[elem];
-		if (elem < listeEntiers.taille() - 1)
+		if (elem < listeEntiers.nElements_ - 1)
 		{
 			cout << ", ";
 		}
@@ -268,36 +269,36 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 	if (trouve)
 	{
 		cout << "Element trouve : " << *trouve << endl;
+		cout << ligneDeSeparation;
 	}
 
 	else
 	{
 		cout << "Element non trouve" << endl;
+		cout << ligneDeSeparation;
 	}
-
-
-	static const string ligneDeSeparation = "\n\033[96m════════════════════════════════════════════════════════\033[0m\n";
 
 	static const string ligneSeparationCreation = "\n\033[35m═══════════════════ Creation de ma liste de jeu ═════════════════════\033[0m\n";
 	cout << endl << ligneSeparationCreation;
 
 	Liste<Jeu> listeJeux = creerListeJeux("jeux.bin");
-
+	
 	// --------------------------------------------- Affichage de ma liste ---------------------------------------------
 
 	static const string ligneSeparationContenu = "\n\033[35m═══════════════════ Affichage du contenu de ma liste de jeu ═════════════════════\033[0m\n";
 	cout << endl << ligneSeparationContenu;
-
+	
 	afficherListeJeux(listeJeux);
 
 	// --------------------------------------------- Question 4 : Test pour la surchage de [] ------------------------------------------------
-	//permettant un accès direct aux éléments de la liste, simplifiant l'accès et l'itération, comme illustré dans le test de validation.
+	// Permettant un accès direct aux éléments de la liste, simplifiant l'accès et l'itération, comme illustré dans le test de validation.
 
 	static const string ligneSeparationSurchage = "\n\033[35m═══════════════════ Test surchage operator[] ═════════════════════\033[0m\n";
 	cout << endl << ligneSeparationSurchage;
 
 	cout << ligneDeSeparation;
-	afficherInfosJeu(*listeJeux[2]);
+	cout << "Affichage du titre du jeu à l’indice 2 : " << listeJeux[2]->titre << endl;
+	cout << "Le nom de son concepteur à l’indice 1 : " << *listeJeux[2]->concepteurs[1] << endl;
 	cout << ligneDeSeparation << endl;
 
 	// --------------------------------------------- Question 5 : Test pour la fonction trouverConcepteur ---------------------------------------------
@@ -371,5 +372,5 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
 	static const string ligneSeparationDestruction = "\n\033[35m═══════════════════ Destruction de ma liste de jeu ═════════════════════\033[0m\n";
 	cout << ligneSeparationDestruction;
 
-	detruireListeJeux(listeJeux);
+	retirerListeJeux(listeJeux);
 }

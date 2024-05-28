@@ -25,7 +25,7 @@ void Developpeur::ajouterJeux(Liste<Jeu>& listeJeux)
 void Developpeur::afficher() const
 {
 	cout << "\n" << getNom() << " a développé les jeux suivants :" << endl;
-	if (paireNomJeux_.second.taille() > 0)
+	if (paireNomJeux_.second.nElements_ > 0)
 	{
 		for (shared_ptr<Jeu>& j : paireNomJeux_.second.enSpan()) 
 			cout << "\t\033[33m" << j->titre << "\033[0m" << endl;

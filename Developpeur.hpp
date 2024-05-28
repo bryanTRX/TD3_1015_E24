@@ -7,6 +7,8 @@
 
 class Jeu;
 
+using ListeJeux = Liste<Jeu>;
+
 class Developpeur
 {
 public:
@@ -21,5 +23,5 @@ public:
 private:
     unsigned compterJeuxDeveloppes(Liste<Jeu>& listeJeux);
 
-    std::pair<std::string, Liste<Jeu>> paireNomJeux_;
+    std::pair<std::string, ListeJeux> paireNomJeux_;
 };
